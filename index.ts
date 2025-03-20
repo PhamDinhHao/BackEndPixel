@@ -5,9 +5,8 @@ import cloudinary from "cloudinary";
 import { config } from "dotenv";
 import productRoutes from "./src/routes/productRoutes";
 import sequelize from "./src/config/database";
-config(); // Tải biến môi trường từ file .env
+config();
 
-// Cấu hình Cloudinary
 cloudinary.v2.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -21,11 +20,9 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Cấu hình multer để xử lý file upload
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Route upload hình ảnh
 app.post("/upload", upload.single("image"), async (req: any, res: any) => {
   try {
     const file = req.file;
@@ -33,7 +30,6 @@ app.post("/upload", upload.single("image"), async (req: any, res: any) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    // Upload lên Cloudinary
     const result = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.v2.uploader.upload_stream(
         { folder: "products" },
@@ -52,7 +48,6 @@ app.post("/upload", upload.single("image"), async (req: any, res: any) => {
 });
 app.use('/products', productRoutes);
 
-// Sync database
 sequelize.sync()
   .then(() => {
     console.log('Database synced');

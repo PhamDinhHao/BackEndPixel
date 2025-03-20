@@ -53,13 +53,11 @@ export const tryOnClothes = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "Product ID and selfie are required" });
     }
 
-    // Lấy thông tin sản phẩm từ database
     const product = await Product.findByPk(productId);
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    // Upload ảnh selfie lên Cloudinary
     const selfieResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.v2.uploader.upload_stream(
         { folder: "selfies" },
@@ -71,7 +69,6 @@ export const tryOnClothes = async (req: Request, res: Response) => {
       uploadStream.end(selfie.buffer);
     }) as { secure_url: string };
 
-    // Gọi API try-on
     const tryOnResult = await axios.post('https://api.developer.pixelcut.ai/v1/try-on', {
       person_image_url: selfieResult.secure_url,
       garment_image_url: product.imageUrl
@@ -83,7 +80,6 @@ export const tryOnClothes = async (req: Request, res: Response) => {
       }
     });
 
-    // Trả về kết quả
     res.json(tryOnResult.data);
 
   } catch (error) {
